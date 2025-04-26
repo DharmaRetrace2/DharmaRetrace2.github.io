@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>素心居 | 科技与玄学</title>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500&family=Srisakdi&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 内嵌 CSS 样式 */
+      :root {
+        --neon-cyan: #0ff;
+        --deep-space: #0a0a12;
+        --stardust: #e0e0e0;
+        --void: rgba(0, 0, 0, 0.8);
+        --mantra-gold: #ffd700;
+        --sutra-blue: #3d5afe;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--deep-space);
+        color: var(--stardust);
+        font-family: 'Noto Sans SC', sans-serif;
+        line-height: 1.8;
+        overflow-x: hidden;
+      }
+
+      /* 粒子背景 */
+      #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .container {
+        width: 85%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 0;
+      }
+
+      .glass-header {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          rgba(30, 30, 30, 0.9) 0%,
+          rgba(42, 42, 42, 0.7) 100%
+        );
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 4rem 0;
+        text-align: center;
+        z-index: 2;
+      }
+
+      .glass-header h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 4rem;
+        background: linear-gradient(45deg, #0ff, #3d5afe, #ffd700);
+        background-size: 200% auto;
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 5s ease infinite;
+        text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        letter-spacing: 0.05em;
+        position: relative;
+        margin-bottom: 1rem;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* 修改 tagline 字体设置为宋体 */
+      .tagline {
+        font-family: "宋体", SimSun, serif;
+        font-size: 1.5rem;
+        color: var(--mantra-gold);
+        margin-bottom: 2rem;
+      }
+
+      .glass-card {
+        position: relative;
+        background: rgba(30, 30, 30, 0.6);
+        border: 1px solid rgba(0, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 2rem;
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
+      }
+
+      .glass-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+      }
+
+      .card-halo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        background: radial-gradient(
+          circle at 50% 0%,
+          rgba(0, 255, 255, 0.3),
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+
+      .lotus {
+        width: 100px;
+        height: 100px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 15a5 5 0 0 1 5 5v20h20a5 5 0 0 1 0 10H55v20a5 5 0 0 1-10 0V50H25a5 5 0 0 1 0-10h20V20a5 5 0 0 1 5-5z' fill='%230ff'/%3E%3C/svg%3E");
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .mandala {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        animation: rotate 20s linear infinite;
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* 智慧结晶区域采用响应式网格布局 */
+      .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+      }
+
+      /* 修改“智慧结晶”标题样式为友情链接的渐变样式 */
+      #achievements h2 {
+        margin-bottom: 1rem;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2rem;
+        background: linear-gradient(45deg, #0ff, #3d5afe, #ffd700);
+        background-size: 200% auto;
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .glass-footer {
+        background: rgba(30, 30, 30, 0.8);
+        backdrop-filter: blur(5px);
+        border-top: 1px solid rgba(0, 255, 255, 0.2);
+        padding: 2rem 0;
+        margin-top: 0.05rem;
+        text-align: center;
+      }
+
+      .toast {
+        background: rgba(0, 30, 30, 0.9);
+        border: 1px solid var(--neon-cyan);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      }
+
+      /* 让卡片内容整体可点击 */
+      .glass-card > a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        height: 100%;
+      }
+
+      /* 推荐栏样式 — 修改友情链接整体占区域变小，且标题采用智慧结晶原先的样式 */
+      #recommendations {
+        background: rgba(30, 30, 30, 0.8);
+        padding: 1rem 0;
+        margin-top: 1rem;
+        text-align: center;
+      }
+
+      /* 将友情链接标题改为智慧结晶那种的风格：去除渐变透明效果 */
+      #recommendations h2 {
+        margin-bottom: 1rem;
+        font-family: inherit;
+        font-size: 1.5rem;
+        color: var(--stardust);
+        background: none;
+        background-clip: initial;
+        -webkit-background-clip: initial;
+        -webkit-text-fill-color: initial;
+      }
+
+      .recommendations-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .recommendations-list li {
+        margin: 0 1rem;
+        font-size: 1.2rem;
+      }
+
+      .recommendations-list a {
+        color: var(--stardust);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .recommendations-list a:hover {
+        color: var(--neon-cyan);
+      }
+
+      /* 装饰性小点区域 */
+      .decorative-dots {
+        width: 100%;
+        height: 50px;
+        background: radial-gradient(circle, var(--neon-cyan) 1px, transparent 1px);
+        background-size: 10px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 粒子背景 -->
+    <div id="particles-js"></div>
+
+    <!-- 页眉 -->
+    <header class="glass-header">
+      <div class="container">
+        <h1 data-text="素心居">素心居</h1>
+        <p class="tagline">佛学•UFO•AI</p>
+      </div>
+    </header>
+
+    <!-- 主体内容 -->
+    <main>
+      <!-- 智慧结晶 -->
+      <section id="achievements">
+        <div class="container">
+          <h2>智慧结晶</h2>
+          <div class="achievements-grid">
+            <article class="glass-card">
+              <a href="about1.html">
+                <div class="card-halo"></div>
+                <h3>溯空余韵</h3>
+                <p>主要内容为佛学知识、原始佛教知识、佛法探究等等</p>
+                <div class="mandala"></div>
+              </a>
+            </article>
+            <article class="glass-card">
+              <a href="about2.html">
+                <div class="card-halo"></div>
+                <h3>玄幽异录</h3>
+                <p>主要内容为UFO、UAP、天文学、宇宙学等等</p>
+                <div class="mandala"></div>
+              </a>
+            </article>
+            <article class="glass-card">
+              <a href="about3.html">
+                <div class="card-halo"></div>
+                <h3>机心探微</h3>
+                <p>主要内容为科技发展、AI资讯等等</p>
+                <div class="mandala"></div>
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 推荐栏 -->
+      <section id="recommendations">
+        <div class="container">
+          <h2>友情链接</h2>
+          <ul class="recommendations-list">
+            <li>
+              <a href="https://agama.buddhason.org/index.htm">庄春江工作站</a>
+            </li>
+            <li>
+              <a href="https://suttacentral.net/?lang=zh">suttacentral---经文的查找</a>
+            </li>
+            <li>
+              <a href="https://www.dhammatalks.org/">dhammatalks---坦尼沙罗尊者所在僧团</a>
+            </li>
+            <li>
+              <a href="https://cbetaonline.dila.edu.tw/zh/">超全经文查找</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 装饰性小点区域 -->
+      <div class="decorative-dots"></div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="glass-footer">
+      <div class="container">
+        <p>卍 © 2025 素心居 卍</p>
+      </div>
+    </footer>
+
+    <!-- 引入 particles.js 库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+      // DOM 加载完成后初始化交互效果
+      document.addEventListener("DOMContentLoaded", () => {
+        // 粒子背景初始化：禁用点击事件，点击时背景动效保持不变
+        particlesJS("particles-js", {
+          particles: {
+            number: { value: 80 },
+            color: { value: "#0ff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5 },
+            size: { value: 3 },
+            move: {
+              enable: true,
+              speed: 2,
+              direction: "none",
+              random: true,
+              straight: false,
+              out_mode: "out",
+              bounce: false
+            }
+          },
+          interactivity: {
+            events: {
+              onhover: { enable: true, mode: "repulse" },
+              onclick: { enable: false }
+            }
+          }
+        });
+
+        // 卡片悬停光效
+        document.querySelectorAll(".glass-card").forEach((card) => {
+          card.addEventListener("mousemove", (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty("--x", `${x}px`);
+            card.style.setProperty("--y", `${y}px`);
+          });
+        });
+
+        // 动态法轮旋转
+        setInterval(() => {
+          document.querySelectorAll(".mandala").forEach((mandala) => {
+            mandala.style.transform = `rotate(${(Date.now() / 50) % 360}deg)`;
+          });
+        }, 50);
+      });
+    </script>
+  </body>
+</html>
