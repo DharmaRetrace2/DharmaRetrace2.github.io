@@ -1,397 +1,820 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>素心居 | 科技与玄学</title>
-    <!-- Google Fonts -->
+
+    <meta name="description" content="素心居：佛学 • UFO • AI。以赛博禅意为骨，汇聚佛法探究、宇宙异闻与前沿科技洞见。" />
+    <meta name="keywords" content="佛学, 原始佛教, UFO, UAP, 天文学, 宇宙学, 科技, 人工智能, AI" />
+    <meta name="author" content="素心居" />
+    <meta name="theme-color" content="#0a0a12" />
+
+    <meta property="og:title" content="素心居 | 科技与玄学" />
+    <meta property="og:description" content="佛学 • UFO • AI | 以赛博禅意为骨的知识站点" />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "素心居",
+        "inLanguage": "zh-CN",
+        "description": "佛学 • UFO • AI",
+        "publisher": { "@type": "Organization", "name": "素心居" }
+      }
+    </script>
+
     <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500&family=Srisakdi&display=swap"
+      rel="icon"
+      href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%230ff"/><stop offset="50%" stop-color="%233d5afe"/><stop offset="100%" stop-color="%23ffd700"/></linearGradient></defs><rect width="64" height="64" rx="12" fill="%230a0a12"/><path d="M32 8a4 4 0 0 1 4 4v16h16a4 4 0 0 1 0 8H36v16a4 4 0 0 1-8 0V36H12a4 4 0 1 1 0-8h16V12a4 4 0 0 1 4-4z" fill="url(%23g)"/></svg>'
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap"
       rel="stylesheet"
     />
+
     <style>
-      /* 内嵌 CSS 样式 */
       :root {
-        --neon-cyan: #0ff;
+        --neon-cyan: #00fff0;
         --deep-space: #0a0a12;
         --stardust: #e0e0e0;
         --void: rgba(0, 0, 0, 0.8);
         --mantra-gold: #ffd700;
         --sutra-blue: #3d5afe;
+
+        --glass-bg: rgba(30, 30, 30, 0.6);
+        --glass-bg-strong: rgba(30, 30, 30, 0.9);
+        --glass-border: rgba(0, 255, 255, 0.15);
+
+        --radius: 16px;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --shadow-neon: 0 10px 30px rgba(0, 255, 255, 0.18);
+
+        --maxw: 1200px;
       }
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      /* 浅色主题覆盖与美化 */
+      html[data-theme="light"] {
+        --deep-space: radial-gradient(1200px circle at 10% -10%, #ffffff 0%, #f6f9ff 55%, #eef3ff 100%);
+        --stardust: #1d2430;
+
+        --glass-bg: rgba(255, 255, 255, 0.6);
+        --glass-bg-strong: rgba(255, 255, 255, 0.88);
+        --glass-border: rgba(61, 90, 254, 0.22);
+
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        --shadow-neon: 0 10px 30px rgba(61, 90, 254, 0.16);
       }
 
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
       body {
         background: var(--deep-space);
         color: var(--stardust);
-        font-family: 'Noto Sans SC', sans-serif;
+        font-family: 'Noto Sans SC', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
         line-height: 1.8;
         overflow-x: hidden;
+        text-rendering: optimizeLegibility;
+      }
+
+      .container {
+        width: min(92%, var(--maxw));
+        margin: 0 auto;
+        padding: clamp(1rem, 1.5vw, 2rem) 0;
       }
 
       /* 粒子背景 */
       #particles-js {
         position: fixed;
-        width: 100%;
-        height: 100%;
+        inset: 0;
         z-index: 0;
         pointer-events: none;
       }
 
-      .container {
-        width: 85%;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem 0;
-      }
+      /* (REMOVED) 滚动进度条样式 */
 
-      .glass-header {
-        position: relative;
-        background: linear-gradient(
-          135deg,
-          rgba(30, 30, 30, 0.9) 0%,
-          rgba(42, 42, 42, 0.7) 100%
-        );
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        padding: 4rem 0;
-        text-align: center;
-        z-index: 2;
-      }
-
-      .glass-header h1 {
-        font-family: 'Orbitron', sans-serif;
-        font-size: 4rem;
-        background: linear-gradient(45deg, #0ff, #3d5afe, #ffd700);
-        background-size: 200% auto;
-        color: transparent;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: gradientShift 5s ease infinite;
-        text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
-        letter-spacing: 0.05em;
-        position: relative;
-        margin-bottom: 1rem;
-      }
-
-      @keyframes gradientShift {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
-      }
-
-      /* 修改 tagline 字体设置为宋体 */
-      .tagline {
-        font-family: "宋体", SimSun, serif;
-        font-size: 1.5rem;
-        color: var(--mantra-gold);
-        margin-bottom: 2rem;
-      }
-
-      .glass-card {
-        position: relative;
-        background: rgba(30, 30, 30, 0.6);
-        border: 1px solid rgba(0, 255, 255, 0.1);
-        border-radius: 15px;
-        padding: 2rem;
-        backdrop-filter: blur(5px);
-        transition: transform 0.3s, box-shadow 0.3s;
+      /* 跳转主内容 */
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: auto;
+        width: 1px; height: 1px;
         overflow: hidden;
       }
-
-      .glass-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+      .skip-link:focus {
+        position: fixed;
+        left: 1rem; top: 1rem;
+        width: auto; height: auto;
+        padding: 0.5rem 0.75rem;
+        background: var(--glass-bg-strong);
+        color: var(--stardust);
+        border: 1px solid var(--glass-border);
+        border-radius: 8px;
+        z-index: 110;
       }
 
-      .card-halo {
-        position: absolute;
+      /* 顶部导航 */
+      .glass-nav {
+        position: sticky;
         top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 15px;
-        background: radial-gradient(
-          circle at 50% 0%,
-          rgba(0, 255, 255, 0.3),
-          transparent 60%
-        );
-        pointer-events: none;
+        z-index: 90;
+        backdrop-filter: blur(10px);
+        background: linear-gradient(135deg, var(--glass-bg-strong) 0%, rgba(42,42,42,0.45) 100%);
+        border-bottom: 1px solid var(--glass-border);
+      }
+      html[data-theme="light"] .glass-nav {
+        background: linear-gradient(135deg, var(--glass-bg-strong) 0%, rgba(255,255,255,0.6) 100%);
       }
 
-      .lotus {
-        width: 100px;
-        height: 100px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 15a5 5 0 0 1 5 5v20h20a5 5 0 0 1 0 10H55v20a5 5 0 0 1-10 0V50H25a5 5 0 0 1 0-10h20V20a5 5 0 0 1 5-5z' fill='%230ff'/%3E%3C/svg%3E");
-        animation: float 3s ease-in-out infinite;
+      .nav-inner {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.6rem 0;
       }
-
-      @keyframes float {
-        0%, 100% {
-          transform: translateY(0);
-        }
-        50% {
-          transform: translateY(-20px);
-        }
-      }
-
-      .mandala {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(
-          circle,
-          rgba(0, 255, 255, 0.1) 0%,
-          transparent 70%
-        );
-        animation: rotate 20s linear infinite;
-      }
-
-      @keyframes rotate {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* 智慧结晶区域采用响应式网格布局 */
-      .achievements-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-      }
-
-      /* 修改“智慧结晶”标题样式为友情链接的渐变样式 */
-      #achievements h2 {
-        margin-bottom: 1rem;
+      .brand {
+        display: flex; align-items: center; gap: 0.6rem;
         font-family: 'Orbitron', sans-serif;
-        font-size: 2rem;
-        background: linear-gradient(45deg, #0ff, #3d5afe, #ffd700);
+        letter-spacing: 0.04em;
+        font-weight: 700;
+      }
+      .brand-logo {
+        inline-size: 28px; block-size: 28px;
+        background: radial-gradient(circle at 60% 40%, #0ff, transparent 60%), radial-gradient(circle at 40% 60%, #3d5afe, transparent 60%);
+        border-radius: 6px;
+        box-shadow: 0 0 12px rgba(0,255,255,0.4);
+      }
+      html[data-theme="light"] .brand-logo {
+        box-shadow: 0 0 10px rgba(61,90,254,0.22), 0 0 6px rgba(0,255,255,0.16);
+      }
+
+      /* 导航品牌文字：轻微渐变美化 */
+      .brand a {
+        color: var(--stardust);
+        text-decoration: none;
+        font-size: 1.05rem;
+        background: linear-gradient(90deg, var(--neon-cyan), var(--sutra-blue));
         background-size: 200% auto;
-        color: transparent;
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 10px rgba(0,255,240,0.08);
+        transition: filter 0.2s ease, text-shadow 0.2s ease;
+        animation: titleShift 8s ease-in-out infinite;
+      }
+      .brand a:hover {
+        filter: brightness(1.1);
+        text-shadow: 0 0 12px rgba(61,90,254,0.18);
+      }
+      html[data-theme="light"] .brand a {
+        text-shadow: 0 0 6px rgba(61,90,254,0.12);
       }
 
-      .glass-footer {
-        background: rgba(30, 30, 30, 0.8);
-        backdrop-filter: blur(5px);
-        border-top: 1px solid rgba(0, 255, 255, 0.2);
-        padding: 2rem 0;
-        margin-top: 0.05rem;
-        text-align: center;
+      .nav-menu {
+        display: flex; align-items: center; gap: 1rem;
+      }
+      .nav-menu a {
+        color: var(--stardust); text-decoration: none;
+        padding: 0.4rem 0.6rem; border-radius: 10px;
+        transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      }
+      .nav-menu a:hover, .nav-menu a:focus-visible {
+        color: var(--neon-cyan);
+        background: rgba(0,255,255,0.06);
+        box-shadow: inset 0 0 0 1px var(--glass-border);
+        outline: none;
       }
 
-      .toast {
-        background: rgba(0, 30, 30, 0.9);
-        border: 1px solid var(--neon-cyan);
-        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      .nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+      .icon-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; border-radius: 50%;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-bg);
+        color: var(--stardust);
+        cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+      .icon-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-neon); }
+      .icon-btn:active { transform: translateY(0); }
+
+      .nav-toggle {
+        display: none;
+        width: 40px; height: 40px; border-radius: 10px;
+      }
+      .burger {
+        width: 18px; height: 2px; background: var(--stardust); position: relative;
+      }
+      .burger::before, .burger::after {
+        content: ""; position: absolute; left: 0; width: 18px; height: 2px; background: var(--stardust);
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+      .burger::before { top: -6px; }
+      .burger::after  { top: 6px; }
+      .nav-open .burger { background: transparent; }
+      .nav-open .burger::before { transform: translateY(6px) rotate(45deg); }
+      .nav-open .burger::after  { transform: translateY(-6px) rotate(-45deg); }
+
+      @media (max-width: 900px) {
+        .nav-menu {
+          position: fixed; inset: 56px 0 auto 0; height: auto;
+          background: var(--glass-bg-strong);
+          border-bottom: 1px solid var(--glass-border);
+          padding: 0.75rem 4%;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+          transform-origin: top; transform: scaleY(0);
+          transition: transform 0.18s ease;
+        }
+        .nav-open .nav-menu { transform: scaleY(1); }
+        .nav-toggle { display: inline-flex; }
       }
 
-      /* 让卡片内容整体可点击 */
-      .glass-card > a {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-        height: 100%;
+      /* 页眉（Hero） */
+      .glass-header {
+        position: relative; text-align: center; z-index: 2;
+        background: linear-gradient(135deg, var(--glass-bg-strong) 0%, rgba(42,42,42,0.6) 100%);
+        border-bottom: 1px solid var(--glass-border);
+        padding: clamp(2rem, 8vw, 5.5rem) 0 clamp(1.5rem, 5vw, 3rem);
+        box-shadow: var(--shadow);
+      }
+      html[data-theme="light"] .glass-header {
+        background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.66) 100%);
       }
 
-      /* 推荐栏样式 — 修改友情链接整体占区域变小，且标题采用智慧结晶原先的样式 */
+      /* 优化后的“素心居”字样（更具禅意与赛博感） */
+      .logo-title {
+        position: relative;
+        display: inline-block;
+        font-family: 'ZCOOL XiaoWei', 'Ma Shan Zheng', 'Noto Sans SC', serif;
+        font-size: clamp(2.6rem, 7vw, 4.6rem);
+        letter-spacing: 0.16em;
+        line-height: 1.1;
+        margin-bottom: 0.65rem;
+
+        /* 双色氛围 + 高光描边 */
+        background: linear-gradient(100deg, var(--neon-cyan) 0%, var(--sutra-blue) 100%);
+        background-size: 180% 100%;
+        background-position: 20% 50%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+
+        /* 外发光与微弱描边，兼顾浅色/深色 */
+        -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.06);
+        text-shadow:
+          0 2px 12px rgba(0,255,255,0.25),
+          0 4px 24px rgba(61,90,254,0.18);
+        animation: titleShift 8s ease-in-out infinite;
+      }
+      @keyframes titleShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .logo-title::after {
+        /* 掠过的高光扫光 */
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(70deg, transparent 15%, rgba(255,255,255,0.6) 50%, transparent 85%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        mix-blend-mode: screen;
+        filter: blur(0.2px);
+        animation: shine 3.5s linear infinite;
+      }
+      @keyframes shine {
+        0% { background-position: -150% 0; }
+        100% { background-position: 150% 0; }
+      }
+      /* 浅色主题下适配发光强度 */
+      html[data-theme="light"] .logo-title {
+        -webkit-text-stroke: 0.6px rgba(0, 0, 0, 0.05);
+        text-shadow:
+          0 2px 10px rgba(61,90,254,0.18),
+          0 0 20px rgba(0,255,240,0.14);
+      }
+
+      /* 优化“下面的字”：佛学 • UFO • AI */
+      .tagline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.66rem;
+        font-family: 'Noto Sans SC', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        font-size: clamp(1.05rem, 2.8vw, 1.5rem);
+        letter-spacing: 0.08em;
+        color: #e6faff;
+        text-shadow: 0 0 8px rgba(0,255,240,0.2);
+        margin-bottom: 1.1rem;
+      }
+      .tagline .dot-sep {
+        color: var(--neon-cyan);
+        opacity: 0.9;
+        text-shadow: 0 0 10px rgba(0,255,255,0.6);
+      }
+      .tagline span {
+        background: linear-gradient(90deg, var(--neon-cyan), var(--sutra-blue));
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: titleShift 7s linear infinite reverse;
+      }
+      html[data-theme="light"] .tagline { color: #2a3140; text-shadow: none; }
+      html[data-theme="light"] .tagline .dot-sep { text-shadow: 0 0 6px rgba(61,90,254,0.18); }
+
+      .hero-actions {
+        display: inline-flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center;
+      }
+      .btn {
+        position: relative;
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        border-radius: 12px; border: 1px solid var(--glass-border);
+        background: linear-gradient(180deg, rgba(0, 255, 255, 0.08), rgba(0,0,0,0));
+        color: var(--stardust); text-decoration: none; cursor: pointer;
+        box-shadow: var(--shadow-neon);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+      }
+      .btn:hover { transform: translateY(-2px); color: var(--neon-cyan); background: linear-gradient(180deg, rgba(0,255,255,0.12), rgba(0,0,0,0)); }
+      html[data-theme="light"] .btn {
+        background: linear-gradient(180deg, rgba(61, 90, 254, 0.08), rgba(0,0,0,0));
+      }
+      .btn .dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: radial-gradient(circle, #0ff, #3d5afe);
+        box-shadow: 0 0 8px rgba(0,255,255,0.6);
+      }
+
+      /* 主体 */
+      main { position: relative; z-index: 1; }
+
+      /* 智慧结晶 */
+      #achievements h2 {
+        margin-bottom: 0.5rem;
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.6rem, 3.2vw, 2rem);
+        background: linear-gradient(45deg, #0ff, #3d5afe, #ffd700);
+        background-size: 200% auto; color: transparent;
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      }
+      .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: clamp(1rem, 2vw, 2rem);
+        margin-top: 1rem;
+        align-items: stretch;
+      }
+
+      /* 卡片（按钮模块）统一尺寸与CTA美化 */
+      .glass-card {
+        position: relative;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius);
+        padding: 1.4rem;
+        backdrop-filter: blur(6px);
+        transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.2s ease;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transform-style: preserve-3d;
+        min-height: clamp(220px, calc(26vw + 100px), 280px);
+      }
+      .glass-card a {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        align-content: start;
+        gap: 0.5rem;
+        text-decoration: none; color: inherit; height: 100%;
+      }
+      .glass-card:hover { transform: translateY(-6px) rotateX(3deg) rotateY(-3deg); box-shadow: var(--shadow-neon); border-color: rgba(0,255,255,0.28); }
+      .glass-card h3 { font-size: 1.2rem; margin-bottom: 0.2rem; }
+      .glass-card p { opacity: 0.92; }
+
+      /* 统一CTA按钮样式 */
+      .card-cta {
+        justify-self: start;
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        padding: 0.48rem 0.8rem;
+        border-radius: 10px;
+        border: 1px solid var(--glass-border);
+        background: linear-gradient(180deg, rgba(61, 90, 254, 0.08), rgba(0,0,0,0));
+        box-shadow: var(--shadow-neon);
+        color: var(--stardust);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+      }
+      .glass-card:hover .card-cta {
+        transform: translateY(-1px);
+        background: linear-gradient(180deg, rgba(0,255,255,0.12), rgba(0,0,0,0));
+        color: var(--neon-cyan);
+      }
+      .card-cta svg { opacity: 0.9; }
+
+      /* 卡片光晕与曼陀罗 */
+      .card-halo {
+        position: absolute; inset: 0; border-radius: var(--radius);
+        background: radial-gradient(600px circle at var(--x, 50%) var(--y, 0%), rgba(0,255,255,0.22), transparent 45%);
+        pointer-events: none; transition: background 0.1s ease;
+      }
+      .mandala {
+        position: absolute; inset: -25% -25% auto auto; aspect-ratio: 1/1;
+        width: 150%;
+        background: radial-gradient(circle, rgba(0,255,255,0.08) 0%, transparent 60%);
+        animation: rotate 24s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+      /* 友情链接 */
       #recommendations {
         background: rgba(30, 30, 30, 0.8);
-        padding: 1rem 0;
-        margin-top: 1rem;
-        text-align: center;
+        backdrop-filter: blur(5px);
+        border-top: 1px solid var(--glass-border);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 1.2rem 0; margin-top: 1rem; text-align: center;
       }
-
-      /* 将友情链接标题改为智慧结晶那种的风格：去除渐变透明效果 */
+      html[data-theme="light"] #recommendations { background: rgba(255,255,255,0.78); }
       #recommendations h2 {
-        margin-bottom: 1rem;
-        font-family: inherit;
-        font-size: 1.5rem;
-        color: var(--stardust);
-        background: none;
-        background-clip: initial;
-        -webkit-background-clip: initial;
-        -webkit-text-fill-color: initial;
-      }
-
-      .recommendations-list {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .recommendations-list li {
-        margin: 0 1rem;
+        margin-bottom: 0.75rem;
         font-size: 1.2rem;
-      }
-
-      .recommendations-list a {
         color: var(--stardust);
-        text-decoration: none;
-        transition: color 0.3s;
       }
-
+      .recommendations-list {
+        list-style: none; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.8rem 1.2rem;
+      }
+      .recommendations-list a {
+        color: var(--stardust); text-decoration: none; padding: 0.2rem 0.4rem; border-radius: 8px;
+        transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      }
       .recommendations-list a:hover {
         color: var(--neon-cyan);
+        background: rgba(0,255,255,0.06);
+        box-shadow: inset 0 0 0 1px var(--glass-border);
       }
 
       /* 装饰性小点区域 */
       .decorative-dots {
         width: 100%;
-        height: 50px;
-        background: radial-gradient(circle, var(--neon-cyan) 1px, transparent 1px);
+        height: 54px;
+        background: radial-gradient(circle, var(--neon-cyan) 0.75px, transparent 1px);
         background-size: 10px 10px;
+        opacity: 0.35;
       }
+
+      /* 页脚 */
+      .glass-footer {
+        background: var(--glass-bg-strong);
+        backdrop-filter: blur(6px);
+        border-top: 1px solid var(--glass-border);
+        padding: 1.2rem 0;
+        text-align: center;
+        margin-top: 0.05rem;
+      }
+
+      /* 返回顶部按钮 */
+      .back-to-top {
+        position: fixed; right: 14px; bottom: 14px; z-index: 95;
+        opacity: 0; pointer-events: none; transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      .back-to-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+      /* 入场动画（IntersectionObserver） */
+      .reveal { opacity: 0; transform: translateY(12px) scale(0.98); transition: opacity 0.5s ease, transform 0.5s ease; }
+      .reveal.in { opacity: 1; transform: none; }
+
+      /* 减少动画偏好 */
+      @media (prefers-reduced-motion: reduce) {
+        * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+        .mandala, .glass-card:hover { animation: none !important; transform: none !important; }
+        .logo-title::after { display: none !important; }
+      }
+
+      /* 可聚焦可见 */
+      :focus-visible { outline: 2px dashed var(--neon-cyan); outline-offset: 2px; border-radius: 8px; }
     </style>
   </head>
   <body>
-    <!-- 粒子背景 -->
-    <div id="particles-js"></div>
+    <a href="#main-content" class="skip-link">跳到主内容</a>
+    <div id="particles-js" aria-hidden="true"></div>
 
-    <!-- 页眉 -->
+    <nav class="glass-nav" aria-label="主导航">
+      <div class="container nav-inner">
+        <div class="brand">
+          <span class="brand-logo" aria-hidden="true"></span>
+          <a href="#" aria-label="返回首页">素心居</a>
+        </div>
+
+        <div class="nav-actions">
+          <button id="share-btn" class="icon-btn" title="分享本站" aria-label="分享本站">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M12 16V4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="theme-toggle" class="icon-btn" title="切换主题" aria-label="切换主题（深/浅）">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/>
+            </svg>
+          </button>
+          <button id="nav-toggle" class="icon-btn nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="打开菜单">
+            <span class="burger" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+      <div class="container">
+        <div id="nav-menu" class="nav-menu" role="menu">
+          <a role="menuitem" href="#achievements">智慧结晶</a>
+          <a role="menuitem" href="#recommendations">友情链接</a>
+          </div>
+      </div>
+    </nav>
+
     <header class="glass-header">
       <div class="container">
-        <h1 data-text="素心居">素心居</h1>
-        <p class="tagline">佛学•UFO•AI</p>
+        <h1 class="logo-title reveal" data-text="素心居">素心居</h1>
+
+        <p class="tagline reveal">
+          <span>佛学</span><span class="dot-sep" aria-hidden="true">•</span><span>UFO</span><span class="dot-sep" aria-hidden="true">•</span><span>AI</span>
+        </p>
+
+        <div class="hero-actions reveal" style="--delay:120ms">
+          <a class="btn" href="#achievements"><span class="dot" aria-hidden="true"></span> 开始探索</a>
+          <a class="btn" href="#recommendations">精选链接</a>
+        </div>
       </div>
     </header>
 
-    <!-- 主体内容 -->
-    <main>
-      <!-- 智慧结晶 -->
-      <section id="achievements">
+    <main id="main-content">
+      <section id="achievements" aria-labelledby="achievements-title">
         <div class="container">
-          <h2>智慧结晶</h2>
+          <h2 id="achievements-title" class="reveal">智慧结晶</h2>
           <div class="achievements-grid">
-            <article class="glass-card">
+            <article class="glass-card reveal" tabindex="0" aria-label="溯空余韵">
               <a href="about1.html">
-                <div class="card-halo"></div>
+                <div class="card-halo" aria-hidden="true"></div>
                 <h3>溯空余韵</h3>
                 <p>主要内容为佛学知识、原始佛教知识、佛法探究等等</p>
-                <div class="mandala"></div>
+                <span class="card-cta" aria-hidden="true">
+                  进入
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <div class="mandala" aria-hidden="true"></div>
               </a>
             </article>
-            <article class="glass-card">
+
+            <article class="glass-card reveal" tabindex="0" aria-label="玄幽异录">
               <a href="about2.html">
-                <div class="card-halo"></div>
+                <div class="card-halo" aria-hidden="true"></div>
                 <h3>玄幽异录</h3>
                 <p>主要内容为UFO、UAP、天文学、宇宙学等等</p>
-                <div class="mandala"></div>
+                <span class="card-cta" aria-hidden="true">
+                  进入
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <div class="mandala" aria-hidden="true"></div>
               </a>
             </article>
-            <article class="glass-card">
+
+            <article class="glass-card reveal" tabindex="0" aria-label="机心探微">
               <a href="about3.html">
-                <div class="card-halo"></div>
+                <div class="card-halo" aria-hidden="true"></div>
                 <h3>机心探微</h3>
                 <p>主要内容为科技发展、AI资讯等等</p>
-                <div class="mandala"></div>
+                <span class="card-cta" aria-hidden="true">
+                  进入
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <div class="mandala" aria-hidden="true"></div>
               </a>
             </article>
           </div>
         </div>
       </section>
 
-      <!-- 推荐栏 -->
-      <section id="recommendations">
+      <section id="recommendations" aria-labelledby="links-title">
         <div class="container">
-          <h2>友情链接</h2>
-          <ul class="recommendations-list">
-            <li>
-              <a href="https://agama.buddhason.org/index.htm">庄春江工作站</a>
-            </li>
-            <li>
-              <a href="https://suttacentral.net/?lang=zh">suttacentral---经文的查找</a>
-            </li>
-            <li>
-              <a href="https://www.dhammatalks.org/">dhammatalks---坦尼沙罗尊者所在僧团</a>
-            </li>
-            <li>
-              <a href="https://cbetaonline.dila.edu.tw/zh/">超全经文查找</a>
-            </li>
+          <h2 id="links-title" class="reveal">友情链接</h2>
+          <ul class="recommendations-list reveal">
+            <li><a href="https://agama.buddhason.org/index.htm">庄春江工作站</a></li>
+            <li><a href="https://suttacentral.net/?lang=zh">suttacentral--经文的查找</a></li>
+            <li><a href="https://www.dhammatalks.org/">dhammatalks--坦尼沙罗尊者所在僧团</a></li>
+            <li><a href="https://cbetaonline.dila.edu.tw/zh/">超全经文查找</a></li>
           </ul>
         </div>
       </section>
 
-      <!-- 装饰性小点区域 -->
-      <div class="decorative-dots"></div>
+      <div class="decorative-dots" aria-hidden="true"></div>
     </main>
 
-    <!-- 页脚 -->
-    <footer class="glass-footer">
+    <footer class="glass-footer" id="footer">
       <div class="container">
-        <p>卍 © 2025 素心居 卍</p>
+        <p>卍 © <span id="year"></span> 素心居 卍</p>
       </div>
     </footer>
 
-    <!-- 引入 particles.js 库 -->
+    <button class="icon-btn back-to-top" id="back-to-top" title="返回顶部" aria-label="返回顶部">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 20V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M6 11l6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-      // DOM 加载完成后初始化交互效果
-      document.addEventListener("DOMContentLoaded", () => {
-        // 粒子背景初始化：禁用点击事件，点击时背景动效保持不变
+      // 工具函数
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+      // 年份
+      $('#year').textContent = new Date().getFullYear();
+
+      // 主题初始化
+      (function initTheme() {
+        const key = 'sxj-theme';
+        const saved = localStorage.getItem(key);
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initial = saved || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', initial);
+        const themeColor = initial === 'dark' ? '#0a0a12' : '#f7f9fc';
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', themeColor);
+
+        $('#theme-toggle').addEventListener('click', () => {
+          const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', now);
+          localStorage.setItem(key, now);
+          const themeColorNow = now === 'dark' ? '#0a0a12' : '#f7f9fc';
+          if (metaTheme) metaTheme.setAttribute('content', themeColorNow);
+        });
+      })();
+
+      // 导航开关
+      (function navToggle() {
+        const toggle = $('#nav-toggle');
+        const nav = document.body;
+        toggle.addEventListener('click', () => {
+          const open = nav.classList.toggle('nav-open');
+          toggle.setAttribute('aria-expanded', String(open));
+        });
+        // 选中后收起
+        $$('#nav-menu a').forEach(a => a.addEventListener('click', () => {
+          nav.classList.remove('nav-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }));
+      })();
+
+      // (MODIFIED) 返回顶部功能
+      (function scrollUI() {
+        const topBtn = $('#back-to-top');
+
+        const calc = () => {
+          const doc = document.documentElement;
+          const scrollTop = doc.scrollTop || document.body.scrollTop;
+
+          if (scrollTop > 300) topBtn.classList.add('show');
+          else topBtn.classList.remove('show');
+        };
+
+        const onScroll = () => {
+          // 使用 rAF 提升流畅度
+          if (scrollUI._raf) cancelAnimationFrame(scrollUI._raf);
+          scrollUI._raf = requestAnimationFrame(calc);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        window.addEventListener('load', onScroll);
+        calc();
+
+        $('#back-to-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      })();
+
+      // IntersectionObserver 入场动画
+      (function revealOnView() {
+        const els = $$('.reveal');
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('in');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        els.forEach(el => io.observe(el));
+      })();
+
+      // 卡片光标光晕 & 3D 轻微倾斜
+      (function cardEffects() {
+        const cards = $$('.glass-card');
+        cards.forEach(card => {
+          const update = (x, y) => {
+            card.style.setProperty('--x', x + 'px');
+            card.style.setProperty('--y', y + 'px');
+            const rect = card.getBoundingClientRect();
+            const cx = rect.width / 2, cy = rect.height / 2;
+            const dx = (x - cx) / cx, dy = (y - cy) / cy;
+            const rotateX = (+dy * 4).toFixed(2);
+            const rotateY = (-dx * 4).toFixed(2);
+            card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+          };
+          card.addEventListener('pointermove', (e) => {
+            const rect = card.getBoundingClientRect();
+            update(e.clientX - rect.left, e.clientY - rect.top);
+          });
+          card.addEventListener('pointerleave', () => {
+            card.style.transform = '';
+          });
+          // 键盘 focus 也给点高光
+          card.addEventListener('focus', () => {
+            card.querySelector('.card-halo').style.background =
+              'radial-gradient(500px circle at 50% 0%, rgba(0,255,255,0.22), transparent 45%)';
+          });
+          card.addEventListener('blur', () => {
+            card.querySelector('.card-halo').style.background =
+              'radial-gradient(600px circle at var(--x, 50%) var(--y, 0%), rgba(0,255,255,0.22), transparent 45%)';
+          });
+        });
+      })();
+
+      // 分享
+      (function shareInit() {
+        const btn = $('#share-btn');
+        btn.addEventListener('click', async () => {
+          const shareData = {
+            title: document.title,
+            text: '素心居：佛学•UFO•AI',
+            url: location.href
+          };
+          if (navigator.share) {
+            try { await navigator.share(shareData); } catch(_) {}
+          } else {
+            try {
+              await navigator.clipboard.writeText(location.href);
+              btn.classList.add('copied');
+              btn.title = '已复制链接';
+              setTimeout(() => { btn.classList.remove('copied'); btn.title = '分享本站'; }, 1500);
+            } catch(_) {}
+          }
+        });
+      })();
+
+      // 粒子背景初始化（尊重减少动画偏好）
+      (function initParticles() {
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const count = reduce ? 0 : (isMobile ? 50 : 90);
+
         particlesJS("particles-js", {
           particles: {
-            number: { value: 80 },
+            number: { value: count, density: { enable: true, value_area: 800 } },
             color: { value: "#0ff" },
             shape: { type: "circle" },
-            opacity: { value: 0.5 },
-            size: { value: 3 },
+            opacity: { value: 0.45 },
+            size: { value: 2.8, random: true },
             move: {
-              enable: true,
-              speed: 2,
+              enable: !reduce,
+              speed: isMobile ? 1.4 : 2.2,
               direction: "none",
               random: true,
               straight: false,
               out_mode: "out",
               bounce: false
-            }
+            },
+            line_linked: { enable: false }
           },
           interactivity: {
+            detect_on: "canvas",
             events: {
-              onhover: { enable: true, mode: "repulse" },
-              onclick: { enable: false }
-            }
-          }
+              onhover: { enable: !reduce, mode: "repulse" },
+              onclick: { enable: false },
+              resize: true
+            },
+            modes: { repulse: { distance: 100, duration: 0.4 } }
+          },
+          retina_detect: true
         });
+      })();
 
-        // 卡片悬停光效
-        document.querySelectorAll(".glass-card").forEach((card) => {
-          card.addEventListener("mousemove", (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty("--x", `${x}px`);
-            card.style.setProperty("--y", `${y}px`);
-          });
-        });
-
-        // 动态法轮旋转
-        setInterval(() => {
-          document.querySelectorAll(".mandala").forEach((mandala) => {
-            mandala.style.transform = `rotate(${(Date.now() / 50) % 360}deg)`;
-          });
-        }, 50);
+      // 页面隐藏时轻度降载（可选）
+      document.addEventListener('visibilitychange', () => {
+        const canvas = document.querySelector('#particles-js > canvas');
+        if (!canvas) return;
+        if (document.hidden) canvas.style.opacity = '0.1';
+        else canvas.style.opacity = '1';
       });
     </script>
   </body>
