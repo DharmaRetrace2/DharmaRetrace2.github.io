@@ -126,6 +126,69 @@
             line-height: 1.5;
         }
 
+        .toggle-group {
+            margin-bottom: 28px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            border: 2px solid #bae6fd;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #0c4a6e;
+        }
+
+        .toggle-label-icon {
+            font-size: 24px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #cbd5e1;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #6366f1;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 33px;
+        }
+
+        .toggle-description {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #0369a1;
+            line-height: 1.6;
+        }
+
         .button-group {
             display: flex;
             gap: 15px;
@@ -483,6 +546,12 @@
             .event-item {
                 padding: 20px;
             }
+
+            .toggle-container {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -504,6 +573,21 @@
                 <label>经度</label>
                 <input type="text" id="longitude" placeholder="例如: 116.23.11E 或 116.23.11W">
                 <div class="hint">格式：度.分.秒+方向（E为东经，W为西经）</div>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <span class="toggle-label-icon">📚</span>
+                        <span>调用库（使用SunCalc精确计算）</span>
+                    </div>
+                    <div class="toggle-switch" id="toggleSwitch" onclick="toggleCalculationMethod()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="toggle-description" id="toggleDescription">
+                    当前使用：简易累加计算法（基于朔望月周期）
+                </div>
             </div>
             
             <div class="button-group">
@@ -531,6 +615,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
     <script>
+        // 全局变量：是否使用库计算
+        let useLibraryCalculation = false;
+
+        // 切换计算方法
+        function toggleCalculationMethod() {
+            useLibraryCalculation = !useLibraryCalculation;
+            const toggleSwitch = document.getElementById('toggleSwitch');
+            const toggleDescription = document.getElementById('toggleDescription');
+            
+            if (useLibraryCalculation) {
+                toggleSwitch.classList.add('active');
+                toggleDescription.textContent = '当前使用：SunCalc库精确计算（基于天文算法）';
+            } else {
+                toggleSwitch.classList.remove('active');
+                toggleDescription.textContent = '当前使用：简易累加计算法（基于朔望月周期）';
+            }
+        }
+
         // 解析度.分.秒+方向格式的坐标
         function parseDMS(coordStr, coordType) {
             if (!coordStr) {
@@ -573,37 +675,65 @@
             return decimal;
         }
 
-        // 计算月相（使用简化的天文算法）
-        function getMoonPhase(date) {
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
+        // 使用SunCalc库计算月相（精确方法）
+        function calculateMoonPhasesWithLibrary(startDate, endDate) {
+            const phases = [];
+            const phaseNames = ['新月', '上弦月', '满月', '下弦月'];
+            const phaseIcons = ['🌑', '🌓', '🌕', '🌗'];
             
-            let c, e, jd, b;
+            // 遍历每个小时，检测月相变化
+            let current = new Date(startDate);
+            let lastPhaseIndex = -1;
             
-            if (month < 3) {
-                year--;
-                month += 12;
+            // 获取初始月相
+            let lastIllumination = SunCalc.getMoonIllumination(current);
+            let lastPhase = lastIllumination.phase;
+            
+            // 以小时为单位遍历
+            while (current <= endDate) {
+                const illumination = SunCalc.getMoonIllumination(current);
+                const phase = illumination.phase;
+                
+                // 检测月相转换点
+                // phase值：0/1=新月, 0.25=上弦月, 0.5=满月, 0.75=下弦月
+                let currentPhaseIndex = -1;
+                
+                // 检测新月（从0.95到0.05的跨越）
+                if ((lastPhase > 0.95 && phase < 0.05) || (Math.abs(phase - 0) < 0.01 && Math.abs(lastPhase - 0) >= 0.01)) {
+                    currentPhaseIndex = 0;
+                }
+                // 检测上弦月
+                else if (lastPhase < 0.25 && phase >= 0.25) {
+                    currentPhaseIndex = 1;
+                }
+                // 检测满月
+                else if (lastPhase < 0.5 && phase >= 0.5) {
+                    currentPhaseIndex = 2;
+                }
+                // 检测下弦月
+                else if (lastPhase < 0.75 && phase >= 0.75) {
+                    currentPhaseIndex = 3;
+                }
+                
+                if (currentPhaseIndex !== -1 && currentPhaseIndex !== lastPhaseIndex) {
+                    phases.push({
+                        date: new Date(current),
+                        type: phaseNames[currentPhaseIndex],
+                        icon: phaseIcons[currentPhaseIndex],
+                        phase: phase
+                    });
+                    lastPhaseIndex = currentPhaseIndex;
+                }
+                
+                lastPhase = phase;
+                current = new Date(current.getTime() + 3600000); // 加1小时
             }
             
-            ++month;
-            c = 365.25 * year;
-            e = 30.6 * month;
-            jd = c + e + day - 694039.09;
-            jd /= 29.5305882;
-            b = parseInt(jd);
-            jd -= b;
-            b = Math.round(jd * 8);
-            
-            if (b >= 8) {
-                b = 0;
-            }
-            
-            return b;
+            return phases;
         }
 
-        // 计算精确的月相时间（新月、上弦月、满月、下弦月）
-        function calculateMoonPhases(startDate, endDate) {
+        // 使用简易算法计算月相（累加方法）
+        function calculateMoonPhasesSimple(startDate, endDate) {
             const phases = [];
             const phaseNames = ['新月', '上弦月', '满月', '下弦月'];
             const phaseIcons = ['🌑', '🌓', '🌕', '🌗'];
@@ -742,17 +872,23 @@
                 // 获取地点信息
                 const location = await reverseGeocode(lat, lon);
                 
-                // 计算日出时间和月相事件
+                // 获取当前时间
+                const now = new Date();
+                
+                // 计算未来100天
                 const days = 100;
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                const startDate = new Date(now);
+                startDate.setHours(0, 0, 0, 0);
+                
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + days);
                 
                 // 计算所有日出时间、日中天时间
                 const sunrises = [];
                 const solarNoons = [];
                 for (let i = 0; i <= days; i++) {
-                    const date = new Date(today);
-                    date.setDate(today.getDate() + i);
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
                     const times = SunCalc.getTimes(date, lat, lon);
                     sunrises.push(times.sunrise);
                     solarNoons.push(times.solarNoon);
@@ -771,8 +907,13 @@
                     });
                 }
                 
-                // 计算月相事件
-                const moonPhases = calculateMoonPhases(nodes[0].start, nodes[nodes.length - 1].end);
+                // 根据选择的方法计算月相事件
+                let moonPhases;
+                if (useLibraryCalculation) {
+                    moonPhases = calculateMoonPhasesWithLibrary(nodes[0].start, nodes[nodes.length - 1].end);
+                } else {
+                    moonPhases = calculateMoonPhasesSimple(nodes[0].start, nodes[nodes.length - 1].end);
+                }
                 
                 // 将月相事件分配到日节点
                 for (const phase of moonPhases) {
@@ -785,7 +926,7 @@
                 }
                 
                 // 显示结果
-                displayResults(location, lat, lon, nodes);
+                displayResults(location, lat, lon, nodes, startDate, endDate);
                 
                 // 隐藏加载状态
                 document.getElementById('loading').classList.remove('active');
@@ -797,7 +938,7 @@
         }
 
         // 显示结果
-        function displayResults(location, lat, lon, nodes) {
+        function displayResults(location, lat, lon, nodes, startDate, endDate) {
             // 过滤出有事件的节点
             const nodesWithEvents = nodes.filter(node => node.events.length > 0);
             
@@ -806,11 +947,14 @@
                 return;
             }
             
+            const calculationMethod = useLibraryCalculation ? 'SunCalc库精确计算' : '简易累加计算法';
+            
             // 显示地点信息
             document.getElementById('locationInfo').innerHTML = `
                 <strong>位置：</strong>${location}<br>
                 <strong>坐标：</strong>纬度 ${lat.toFixed(6)}°, 经度 ${lon.toFixed(6)}°<br>
-                <strong>时间范围：</strong>${formatDateTime(nodes[0].start)} 至 ${formatDateTime(nodes[nodes.length - 1].end)}<br>
+                <strong>计算方法：</strong>${calculationMethod}<br>
+                <strong>时间范围：</strong>${formatDateTime(startDate)} 至 ${formatDateTime(endDate)}<br>
                 <strong>发现事件：</strong>${nodesWithEvents.length} 个日期包含月相事件
             `;
             
