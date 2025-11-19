@@ -101,7 +101,7 @@
             <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-indigo-400 mb-2">
                 <i class="ph-fill ph-moon-stars inline-block mr-2"></i>星月历
             </h1>
-            <p class="text-slate-400 text-sm md:text-base">计算日出节点间的月相变迁 (未来100天)</p>
+            <p class="text-slate-400 text-sm md:text-base">计算日出节点间的月相变迁</p>
         </header>
 
         <!-- 输入区域 -->
@@ -121,10 +121,19 @@
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end">
+            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-4">
+                <!-- 导出按钮 -->
+                <button onclick="exportData()" id="exportBtn"
+                    class="relative overflow-hidden group border border-blue-400/30 hover:bg-blue-500/20 text-blue-200 font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-download-simple text-xl"></i>
+                    <span id="exportBtnText">导出 CSV (1000天)</span>
+                    <div id="exportLoader" class="loader hidden w-5 h-5 border-2"></div>
+                </button>
+
+                <!-- 计算按钮 -->
                 <button onclick="calculate()" id="calcBtn"
-                    class="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center gap-2">
-                    <span id="btnText">开始计算</span>
+                    class="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2">
+                    <span id="btnText">开始计算 (100天)</span>
                     <div id="btnLoader" class="loader hidden"></div>
                     <i class="ph-bold ph-shooting-star group-hover:rotate-12 transition-transform"></i>
                 </button>
@@ -230,7 +239,7 @@
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit'
-            }).replace(/\//g, '-'); // 将 2023/10/01 替换为 2023-10-01
+            }).replace(/\//g, '-');
         }
 
         function formatDateOnly(dateObj, timezone) {
@@ -242,7 +251,85 @@
             }).replace(/\//g, '-');
         }
 
-        // 5. 核心计算逻辑
+        // 公用计算逻辑函数
+        function performAstronomyCalculation(lat, lon, days) {
+            const observer = new Astronomy.Observer(lat, lon, 0);
+            const now = new Date();
+            
+            let sunriseList = [];
+            let searchTime = now;
+            
+            // 1. 计算日出时刻
+            for(let i=0; i <= days; i++) {
+                const rise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, +1, searchTime, 1);
+                if(rise) {
+                    sunriseList.push(rise.date);
+                    searchTime = new Date(rise.date.getTime() + 3600 * 1000); 
+                } else {
+                    searchTime = new Date(searchTime.getTime() + 24 * 3600 * 1000);
+                    sunriseList.push(searchTime);
+                }
+            }
+
+            // 构建日节点
+            let nodes = [];
+            for(let i=0; i < sunriseList.length - 1; i++) {
+                nodes.push({
+                    start: sunriseList[i],
+                    end: sunriseList[i+1],
+                    events: []
+                });
+            }
+
+            // 2. 计算月相
+            const rangeStart = nodes[0].start;
+            const rangeEnd = nodes[nodes.length-1].end;
+            let moonEvents = [];
+            
+            const phases = [
+                { angle: 0, name: '新月', icon: 'ph-circle' },
+                { angle: 90, name: '上弦月 (半月)', icon: 'ph-moon' },
+                { angle: 180, name: '满月', icon: 'ph-circle-fill' },
+                { angle: 270, name: '下弦月 (半月)', icon: 'ph-moon' }
+            ];
+
+            let searchCursor = rangeStart;
+            let loopSafety = 0;
+            const maxLoops = days * 5; // 增加安全循环次数以匹配天数
+
+            while(searchCursor < rangeEnd && loopSafety < maxLoops) {
+                loopSafety++;
+                let candidates = [];
+                for (let p of phases) {
+                    const m = Astronomy.SearchMoonPhase(p.angle, searchCursor, 35); 
+                    if (m) candidates.push({ time: m.date, type: p.name, angle: p.angle, raw: p });
+                }
+                
+                candidates.sort((a, b) => a.time - b.time);
+                
+                if(candidates.length === 0) break;
+                
+                const nextEvent = candidates[0];
+                if (nextEvent.time > rangeEnd) break;
+                
+                moonEvents.push(nextEvent);
+                searchCursor = new Date(nextEvent.time.getTime() + 1000); 
+            }
+
+            // 3. 匹配
+            for(let event of moonEvents) {
+                for(let node of nodes) {
+                    if(event.time >= node.start && event.time < node.end) {
+                        node.events.push(event);
+                        break;
+                    }
+                }
+            }
+
+            return nodes;
+        }
+
+        // 5. 核心计算逻辑 (UI显示用)
         async function calculate() {
             const latInput = document.getElementById('latInput').value;
             const lonInput = document.getElementById('lonInput').value;
@@ -252,21 +339,17 @@
             const btnLoader = document.getElementById('btnLoader');
             const btnText = document.getElementById('btnText');
 
-            // Reset UI
             errorMsg.classList.add('hidden');
             resultArea.classList.add('hidden');
             timeline.innerHTML = '';
             
-            // Loading State
             btnLoader.classList.remove('hidden');
             btnText.innerText = "计算中...";
             
             try {
-                // 解析坐标
                 const lat = parseDMS(latInput, 'lat');
                 const lon = parseDMS(lonInput, 'lon');
 
-                // 并行获取地理信息和时区
                 const [locName, tzName] = await Promise.all([
                     fetchLocationName(lat, lon),
                     fetchTimezone(lat, lon)
@@ -276,142 +359,61 @@
                 document.getElementById('timezoneName').innerText = tzName;
                 currentTimezone = tzName;
 
-                // --- 天文计算逻辑 ---
+                // 执行100天计算
+                const nodes = performAstronomyCalculation(lat, lon, 100);
 
-                const days = 100;
-                const observer = new Astronomy.Observer(lat, lon, 0);
-                const now = new Date();
-                
-                let sunriseList = [];
-                let searchTime = now;
-                
-                // 1. 计算100天的日出时刻
-                for(let i=0; i <= days; i++) {
-                    const rise = Astronomy.SearchRiseSet(Astronomy.Body.Sun, observer, +1, searchTime, 1);
-                    if(rise) {
-                        sunriseList.push(rise.date);
-                        searchTime = new Date(rise.date.getTime() + 3600 * 1000); 
-                    } else {
-                        // 极昼极夜回退策略
-                        searchTime = new Date(searchTime.getTime() + 24 * 3600 * 1000);
-                        sunriseList.push(searchTime);
-                    }
-                }
+                // 过滤并渲染
+                const validNodes = nodes.filter(n => n.events.length > 0);
 
-                // 构建日节点
-                let nodes = [];
-                for(let i=0; i < sunriseList.length - 1; i++) {
-                    nodes.push({
-                        start: sunriseList[i],
-                        end: sunriseList[i+1],
-                        events: []
-                    });
-                }
-
-                // 2. 计算月相事件 (新月, 上弦, 满月, 下弦)
-                const rangeStart = nodes[0].start;
-                const rangeEnd = nodes[nodes.length-1].end;
-                let moonEvents = [];
-                
-                const phases = [
-                    { angle: 0, name: '新月', icon: 'ph-circle' },
-                    { angle: 90, name: '上弦月 (半月)', icon: 'ph-moon' },
-                    { angle: 180, name: '满月', icon: 'ph-circle-fill' },
-                    { angle: 270, name: '下弦月 (半月)', icon: 'ph-moon' }
-                ];
-
-                let searchCursor = rangeStart;
-                // 限制循环次数防止死循环，虽然一般不会
-                let loopSafety = 0;
-                while(searchCursor < rangeEnd && loopSafety < 500) {
-                    loopSafety++;
-                    let candidates = [];
-                    for (let p of phases) {
-                        const m = Astronomy.SearchMoonPhase(p.angle, searchCursor, 35); 
-                        if (m) candidates.push({ time: m.date, type: p.name, angle: p.angle, raw: p });
-                    }
-                    
-                    candidates.sort((a, b) => a.time - b.time);
-                    
-                    if(candidates.length === 0) break;
-                    
-                    const nextEvent = candidates[0];
-                    if (nextEvent.time > rangeEnd) break;
-                    
-                    moonEvents.push(nextEvent);
-                    searchCursor = new Date(nextEvent.time.getTime() + 1000); 
-                }
-
-                // 3. 匹配事件到节点
-                let hasEvents = false;
-                for(let event of moonEvents) {
-                    for(let node of nodes) {
-                        if(event.time >= node.start && event.time < node.end) {
-                            node.events.push(event);
-                            hasEvents = true;
-                            break;
-                        }
-                    }
-                }
-
-                // 4. 渲染
-                if(!hasEvents) {
+                if(validNodes.length === 0) {
                     timeline.innerHTML = `<div class="text-center text-slate-400 py-10">该时间段内未发现主要月相事件。</div>`;
                 } else {
                     let delayCounter = 0;
-                    nodes.forEach((node, index) => {
-                        if(node.events.length > 0) {
-                            // 日节点日期 (对应 Python: date_str)
-                            const nodeDateStr = formatDateOnly(node.start, tzName);
+                    validNodes.forEach((node) => {
+                        const nodeDateStr = formatDateOnly(node.start, tzName);
+                        
+                        let eventsHtml = '';
+                        node.events.forEach(evt => {
+                            const fullEventStr = formatDateTimeFull(evt.time, tzName);
+                            let iconClass = evt.raw.icon;
+                            let rotateStyle = '';
+                            let colorClass = 'text-yellow-100';
                             
-                            // 生成事件列表
-                            let eventsHtml = '';
-                            node.events.forEach(evt => {
-                                // 月相事件完整时间 (对应 Python: event_str)
-                                const fullEventStr = formatDateTimeFull(evt.time, tzName);
-                                
-                                let iconClass = evt.raw.icon;
-                                let rotateStyle = '';
-                                let colorClass = 'text-yellow-100';
-                                
-                                if(evt.angle === 0) colorClass = 'text-slate-500 stroke-current'; 
-                                if(evt.angle === 180) colorClass = 'text-yellow-200 moon-glow';
-                                if(evt.angle === 270) rotateStyle = 'transform: scaleX(-1);'; 
+                            if(evt.angle === 0) colorClass = 'text-slate-500 stroke-current'; 
+                            if(evt.angle === 180) colorClass = 'text-yellow-200 moon-glow';
+                            if(evt.angle === 270) rotateStyle = 'transform: scaleX(-1);'; 
 
-                                eventsHtml += `
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-black/20 rounded-lg p-3 mb-2 last:mb-0 border border-white/5 hover:bg-white/10 transition-colors gap-2 sm:gap-0">
-                                        <div class="flex items-center gap-3">
-                                            <i class="${iconClass} text-2xl ${colorClass}" style="${rotateStyle}"></i>
-                                            <span class="font-medium ${evt.angle === 180 ? 'text-yellow-100' : 'text-slate-200'}">${evt.type}</span>
-                                        </div>
-                                        <!-- 这里显示完整的日期和时间 -->
-                                        <span class="font-mono-nums text-emerald-300 bg-emerald-900/30 px-3 py-1 rounded text-sm text-center sm:text-right">
-                                            ${fullEventStr}
-                                        </span>
+                            eventsHtml += `
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-black/20 rounded-lg p-3 mb-2 last:mb-0 border border-white/5 hover:bg-white/10 transition-colors gap-2 sm:gap-0">
+                                    <div class="flex items-center gap-3">
+                                        <i class="${iconClass} text-2xl ${colorClass}" style="${rotateStyle}"></i>
+                                        <span class="font-medium ${evt.angle === 180 ? 'text-yellow-100' : 'text-slate-200'}">${evt.type}</span>
                                     </div>
-                                `;
-                            });
-
-                            const card = document.createElement('div');
-                            card.className = 'glass-panel rounded-xl p-5 border-l-4 border-l-blue-500 fade-in-up';
-                            card.style.animationDelay = `${delayCounter * 0.05}s`;
-                            card.innerHTML = `
-                                <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-lg font-bold text-blue-200 tracking-wide">${nodeDateStr}</span>
-                                        <span class="text-[10px] text-slate-500 uppercase tracking-wider">日节点 (Sunrise Node)</span>
-                                    </div>
+                                    <span class="font-mono-nums text-emerald-300 bg-emerald-900/30 px-3 py-1 rounded text-sm text-center sm:text-right">
+                                        ${fullEventStr}
+                                    </span>
                                 </div>
-                                <div>${eventsHtml}</div>
                             `;
-                            timeline.appendChild(card);
-                            delayCounter++;
-                        }
+                        });
+
+                        const card = document.createElement('div');
+                        card.className = 'glass-panel rounded-xl p-5 border-l-4 border-l-blue-500 fade-in-up';
+                        card.style.animationDelay = `${delayCounter * 0.05}s`;
+                        card.innerHTML = `
+                            <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+                                <div class="flex flex-col">
+                                    <span class="text-lg font-bold text-blue-200 tracking-wide">${nodeDateStr}</span>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-wider">日节点 (Sunrise Node)</span>
+                                </div>
+                            </div>
+                            <div>${eventsHtml}</div>
+                        `;
+                        timeline.appendChild(card);
+                        delayCounter++;
                     });
                 }
 
                 resultArea.classList.remove('hidden');
-                
                 setTimeout(() => {
                     resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
@@ -422,11 +424,84 @@
                 document.getElementById('errorText').innerText = e.message || "计算过程中发生未知错误";
             } finally {
                 btnLoader.classList.add('hidden');
-                btnText.innerText = "重新计算";
+                btnText.innerText = "开始计算 (100天)";
+            }
+        }
+
+        // 6. 导出数据逻辑 (1000天)
+        async function exportData() {
+            const latInput = document.getElementById('latInput').value;
+            const lonInput = document.getElementById('lonInput').value;
+            const exportLoader = document.getElementById('exportLoader');
+            const exportBtnText = document.getElementById('exportBtnText');
+            const errorMsg = document.getElementById('errorMsg');
+
+            // UI 状态更新
+            exportLoader.classList.remove('hidden');
+            exportBtnText.innerText = "生成中...";
+            errorMsg.classList.add('hidden');
+
+            try {
+                const lat = parseDMS(latInput, 'lat');
+                const lon = parseDMS(lonInput, 'lon');
+
+                // 重新获取时区，确保导出时时区信息准确（即使未先点击计算）
+                // 为了效率，如果全局已经有时区，可以复用，但为了健壮性重新获取或使用默认值
+                let tzName = currentTimezone;
+                if(tzName === 'UTC') {
+                    tzName = await fetchTimezone(lat, lon);
+                }
+
+                // 计算 1000 天
+                const daysToExport = 1000;
+                const nodes = performAstronomyCalculation(lat, lon, daysToExport);
+
+                // 过滤掉无事件的日子 (events数组为空)
+                const validNodes = nodes.filter(n => n.events.length > 0);
+
+                if (validNodes.length === 0) {
+                    alert("未来1000天内未发现符合条件的月相事件（这非常罕见）。");
+                    return;
+                }
+
+                // 生成 CSV 内容
+                // CSV Header
+                let csvContent = "日出节点日期,星期,月相事件名称,月相发生时间 (当地时间),相位角度\n";
+
+                validNodes.forEach(node => {
+                    const nodeDateStr = formatDateOnly(node.start, tzName);
+                    // 获取星期几
+                    const weekDay = node.start.toLocaleDateString('zh-CN', { timeZone: tzName, weekday: 'long' });
+
+                    node.events.forEach(evt => {
+                        const eventTimeStr = formatDateTimeFull(evt.time, tzName);
+                        // 防止CSV注入，简单替换逗号
+                        const typeSafe = evt.type.replace(/,/g, ' ');
+                        
+                        csvContent += `${nodeDateStr},${weekDay},${typeSafe},${eventTimeStr},${evt.angle}°\n`;
+                    });
+                });
+
+                // 下载文件
+                // 添加 BOM (\uFEFF) 以便 Excel 正确识别 UTF-8 中文
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `月相历_1000天_${latInput}_${lonInput}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (e) {
+                console.error(e);
+                alert("导出失败: " + (e.message || "未知错误"));
+            } finally {
+                exportLoader.classList.add('hidden');
+                exportBtnText.innerText = "导出 CSV (1000天)";
             }
         }
     </script>
 </body>
 </html>
-
 
